@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TND Pay Demo</title>
+<style>
+:root{--bg:#080b19;--panel:#111735;--purple:#792cff;--purple2:#4b20d4;--muted:#aeb5d2;--white:#f8f9ff}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#080b19,#171044);font-family:Arial,sans-serif;color:var(--white);min-height:100vh}
+.wrap{max-width:480px;margin:auto;padding:18px 14px 36px}.top{display:flex;align-items:center;justify-content:space-between;margin:8px 2px 18px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px}.logo{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#a34cff,#4010bb);font-weight:900;font-style:italic;box-shadow:0 0 22px #772cff88}
+.demo{font-size:11px;color:#ffe18a;border:1px solid #a77b26;padding:6px 10px;border-radius:20px;letter-spacing:1px}
+.card{background:linear-gradient(135deg,#7429ee,#3212a9);padding:20px;border-radius:22px;box-shadow:0 12px 32px #0006;margin-bottom:16px}
+.small{font-size:13px;color:#e3d9ff}.balance{font-size:32px;font-weight:800;margin:8px 0 14px}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:16px 0}
+.action{border:1px solid #ffffff20;background:#171d3c;border-radius:15px;padding:13px 5px;text-align:center;font-size:12px;color:white}
+.action b{display:block;font-size:22px;margin-bottom:7px}
+.panel{background:#111735;border:1px solid #333d70;border-radius:20px;padding:17px;margin:14px 0}
+h2{font-size:18px;margin:0 0 14px}label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
+input{width:100%;padding:14px;border-radius:12px;border:1px solid #465080;background:#090f26;color:white;font-size:16px;outline:none}
+button,.button{border:0;border-radius:13px;padding:14px 16px;background:linear-gradient(90deg,#922cff,#5125db);color:white;font-size:15px;font-weight:700;width:100%;margin-top:14px;cursor:pointer;text-decoration:none;display:block;text-align:center}
+button.secondary{background:#252e54;border:1px solid #485486}
+.note{font-size:12px;line-height:1.5;color:#bbc3df}.warning{background:#332a16;border:1px solid #8b6b24;color:#ffe6a5;padding:11px;border-radius:12px;font-size:12px;line-height:1.5}
+.row{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #283052;font-size:13px}.row:last-child{border:0}
+.status{color:#8ff0b1}.hidden{display:none}.stars{display:flex;gap:8px}.stars button{margin:0;padding:8px;background:#252e54}
+footer{text-align:center;color:#7f89b2;font-size:11px;margin:24px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="top"><div class="brand"><div class="logo">TND</div><div>TND Pay<br><span class="small">Pay • Earn • Redeem</span></div></div><div class="demo">DEMO ONLY</div></div>
+ <div class="card"><div class="small">Demo Wallet Balance</div><div class="balance" id="balance">₹0.00</div><div class="small">यह केवल अभ्यास के लिए काल्पनिक बैलेंस है।</div></div>
+ <div class="actions">
+  <div class="action"><b>➤</b>Send Demo</div><div class="action"><b>▦</b>Scan QR</div><div class="action"><b>▣</b>My Card</div><div class="action"><b>🎁</b>Redeem</div>
+ </div>
+ <div class="panel" id="payPanel">
+  <h2>Demo Payment</h2>
+  <div class="warning">इस वेबसाइट से असली पैसा नहीं भेजा जाता। अपना असली UPI PIN, ATM PIN, कार्ड नंबर या OTP कभी न डालें। नीचे केवल इस डेमो का PIN इस्तेमाल करें।</div>
+  <label>प्राप्तकर्ता का नाम</label><input id="name" placeholder="जैसे Rahul" maxlength="35">
+  <label>मोबाइल नंबर (डेमो)</label><input id="phone" placeholder="10 अंकों का नंबर" inputmode="numeric" maxlength="10">
+  <label>डेमो राशि (₹) — कोई भी राशि</label><input id="amount" type="number" min="1" step="1" placeholder="जैसे 5000">
+  <button onclick="showPin()">आगे बढ़ें</button>
+  <div id="pinBox" class="hidden">
+   <label>Demo PIN डालें</label><input id="pin" type="password" inputmode="numeric" maxlength="4" placeholder="डेमो PIN: 1234">
+   <p class="note">इस प्रोटोटाइप का टेस्ट PIN <b>1234</b> है। यह किसी बैंक या UPI PIN से जुड़ा नहीं है।</p>
+   <button onclick="pay()">Confirm Demo Payment</button>
+  </div>
+  <p class="note">डेमो राशि की अधिकतम सीमा नहीं है। हर रिकॉर्ड पर DEMO लिखा जाएगा।</p>
+ </div>
+ <div class="panel hidden" id="success">
+  <h2 class="status">✓ Demo Payment Successful</h2>
+  <div class="balance" id="paidAmount">₹0</div><p id="paidTo" class="note"></p>
+  <p class="note" id="txn"></p><div class="warning">DEMO SUCCESS — कोई वास्तविक भुगतान नहीं हुआ।</div>
+  <button onclick="resetForm()">नया Demo Payment</button>
+ </div>
+ <div class="panel">
+  <h2>Transaction History</h2><div id="history" class="note">अभी कोई डेमो ट्रांजैक्शन नहीं है।</div>
+ </div>
+ <div class="panel">
+  <h2>Payment Rating</h2><p class="note">डेमो अनुभव कैसा रहा?</p>
+  <div class="stars"><button onclick="rate('Happy')">😊 Happy</button><button onclick="rate('Not Happy')">😐 Not Happy</button></div>
+  <p id="rating" class="note"></p>
+ </div>
+ <div class="panel">
+  <h2>DJ King 708</h2><p class="note">चैनल देखने के लिए नीचे क्लिक करें। वेबसाइट YouTube सब्सक्रिप्शन की पुष्टि नहीं करती।</p>
+  <a class="button" href="https://www.youtube.com/@Djking-r1d" target="_blank" rel="noopener">Open YouTube Channel</a>
+ </div>
+ <footer>TND Pay Demo • No real money • No banking connection</footer>
+</div>
+<script>
+let total=0, records=[];
+function money(n){return '₹'+Number(n).toLocaleString('en-IN',{maximumFractionDigits:2});}
+function showPin(){
+ const name=document.getElementById('name').value.trim(), phone=document.getElementById('phone').value.trim(), amount=Number(document.getElementById('amount').value);
+ if(!name || !/^[0-9]{10}$/.test(phone) || !Number.isFinite(amount) || amount<=0){alert('नाम, 10 अंकों का डेमो मोबाइल नंबर और सही राशि भरें।');return;}
+ document.getElementById('pinBox').classList.remove('hidden');
+}
+function pay(){
+ if(document.getElementById('pin').value!=='1234'){alert('गलत Demo PIN। टेस्ट PIN 1234 है।');return;}
+ const name=document.getElementById('name').value.trim(), phone=document.getElementById('phone').value.trim(), amount=Number(document.getElementById('amount').value);
+ total+=amount; const id='TND-DEMO-'+Date.now().toString().slice(-9);
+ records.unshift({name,phone,amount,id,time:new Date().toLocaleString('en-IN')});
+ document.getElementById('balance').textContent=money(total);
+ document.getElementById('paidAmount').textContent=money(amount);
+ document.getElementById('paidTo').textContent='Demo recipient: '+name+' • '+phone;
+ document.getElementById('txn').textContent='Transaction ID: '+id;
+ document.getElementById('success').classList.remove('hidden');
+ document.getElementById('payPanel').classList.add('hidden');
+ renderHistory();
+}
+function renderHistory(){
+ const el=document.getElementById('history');
+ el.innerHTML=records.length?records.map(r=>`<div class="row"><div><b>${escapeHtml(r.name)}</b><br><span class="note">${r.time}<br>${r.id}</span></div><div style="text-align:right"><b>${money(r.amount)}</b><br><span class="status">DEMO</span></div></div>`).join(''):'अभी कोई डेमो ट्रांजैक्शन नहीं है।';
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function resetForm(){document.getElementById('success').classList.add('hidden');document.getElementById('payPanel').classList.remove('hidden');document.getElementById('pinBox').classList.add('hidden');document.getElementById('pin').value='';}
+function rate(v){document.getElementById('rating').textContent='आपकी Demo Rating: '+v;}
+</script>
+</body>
+</html>
