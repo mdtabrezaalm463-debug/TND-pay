@@ -140,3 +140,197 @@ document.getElementById("loginForm")
 
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TND Pay</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#eeeaff;color:#171326}
+button{cursor:pointer;border:0}
+header{background:linear-gradient(120deg,#4010b5,#0755e9);color:white;padding:22px 18px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:30px;font-weight:bold;font-style:italic}
+.headbtn{background:transparent;color:white;font-size:25px}
+#login{padding:25px 18px}
+.panel{background:white;border-radius:22px;padding:22px;margin:18px 0;box-shadow:0 3px 12px #0001}
+input{width:100%;padding:14px;margin:9px 0;border:1px solid #ccc;border-radius:12px;font-size:16px}
+.primary{background:linear-gradient(120deg,#7411db,#3410a8);color:white;padding:14px;border-radius:12px;width:100%;font-size:17px}
+#welcome{background:linear-gradient(110deg,#fff,#ded1ff);border-radius:22px;padding:24px;margin:16px 12px;font-size:20px}
+.grid{background:white;border-radius:24px;margin:12px;padding:15px 8px;display:grid;grid-template-columns:repeat(4,1fr);gap:22px 5px}
+.service{text-align:center;background:transparent;color:#171326;font-size:14px;line-height:1.3;padding:3px}
+.circle{width:66px;height:66px;border-radius:50%;margin:0 auto 9px;background:linear-gradient(145deg,#9c20ee,#3510a9);color:white;display:flex;align-items:center;justify-content:center;font-size:27px;box-shadow:0 4px 9px #0003}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:12px 2px 17px;box-shadow:0 -3px 12px #0002}
+.bottom button{background:white;color:#555;font-size:13px}
+.bottom span{display:block;font-size:23px;margin-bottom:4px}
+#page{padding:15px;padding-bottom:100px}
+.hidden{display:none}
+.back{background:#eee5ff;color:#4210aa;padding:10px 16px;border-radius:10px}
+.card{background:linear-gradient(120deg,#5613c7,#173fe0);color:white;padding:24px;border-radius:20px}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="logo">➤ TND Pay</div>
+ <div>
+  <button class="headbtn" onclick="openPage('Notifications')">♧</button>
+  <button class="headbtn" onclick="openPage('Settings')">⚙</button>
+ </div>
+</header>
+
+<section id="login">
+ <div class="panel">
+  <h2>Welcome to TND Pay</h2>
+  <p>आपका Demo Wallet</p>
+  <input id="username" placeholder="अपना Demo नाम लिखें">
+  <button class="primary" onclick="login()">Login Demo</button>
+  <p style="font-size:12px;color:#777">यह केवल टेस्ट Login है। असली Aadhaar, OTP या PIN न डालें।</p>
+ </div>
+</section>
+
+<main id="home" class="hidden">
+ <div id="welcome">
+  <b>Welcome Back!</b><br>
+  <span id="userlabel">TND User</span>
+ </div>
+
+ <div class="panel" style="margin:12px">
+  <div style="display:flex;justify-content:space-between">
+   <b>Wallet Balance</b>
+   <button onclick="toggleBalance()">👁</button>
+  </div>
+  <h2 id="balance">₹ 5,000.00</h2>
+  <button class="primary" onclick="openPage('Add Money')">＋ Add Money</button>
+  <br><br>
+  <button class="primary" onclick="openPage('Send Money')">Send Money</button>
+ </div>
+
+ <div class="grid">
+  <button class="service" onclick="openPage('Scan & Pay')"><div class="circle">▦</div>Scan & Pay</button>
+  <button class="service" onclick="openPage('Pay via Mobile Number')"><div class="circle">▯</div>Pay via Mobile Number</button>
+  <button class="service" onclick="openPage('To Bank Account')"><div class="circle">🏦</div>To Bank Account</button>
+  <button class="service" onclick="openPage('Check Balance')"><div class="circle">▣</div>Check Balance</button>
+  <button class="service" onclick="openPage('Gift Card')"><div class="circle">🎁</div>Gift Card</button>
+  <button class="service" onclick="openPage('Mobile Recharge')"><div class="circle">⚡</div>Mobile Recharge</button>
+  <button class="service" onclick="openPage('Electricity Bill')"><div class="circle">💡</div>Electricity Bill</button>
+  <button class="service" onclick="openPage('Broadband')"><div class="circle">⌁</div>Broadband</button>
+  <button class="service" onclick="openPage('Gas Bill')"><div class="circle">♨</div>Gas Bill</button>
+ </div>
+</main>
+
+<section id="page" class="hidden">
+ <button class="back" onclick="goHome()">← वापस</button>
+ <div class="panel">
+  <h2 id="pagetitle">TND Pay</h2>
+  <div id="pagecontent"></div>
+ </div>
+</section>
+
+<nav id="nav" class="bottom hidden">
+ <button onclick="goHome()"><span>⌂</span>Home</button>
+ <button onclick="openPage('Pay')"><span>▦</span>Pay</button>
+ <button onclick="openPage('My Debit Card')"><span>▤</span>My Debit Card</button>
+ <button onclick="openPage('History')"><span>◷</span>History</button>
+ <button onclick="openPage('More')"><span>•••</span>More</button>
+</nav>
+
+<script>
+let wallet=5000;
+let hiddenBalance=false;
+let transactions=[];
+
+function login(){
+ const name=document.getElementById('username').value.trim()||'TND User';
+ document.getElementById('userlabel').innerText=name;
+ document.getElementById('login').classList.add('hidden');
+ document.getElementById('home').classList.remove('hidden');
+ document.getElementById('nav').classList.remove('hidden');
+ updateBalance();
+}
+
+function updateBalance(){
+ document.getElementById('balance').innerText=
+ hiddenBalance?'₹ ••••••':'₹ '+wallet.toFixed(2);
+}
+function toggleBalance(){
+ hiddenBalance=!hiddenBalance;
+ updateBalance();
+}
+function goHome(){
+ document.getElementById('page').classList.add('hidden');
+ document.getElementById('home').classList.remove('hidden');
+}
+function openPage(name){
+ document.getElementById('home').classList.add('hidden');
+ document.getElementById('page').classList.remove('hidden');
+ document.getElementById('pagetitle').innerText=name;
+ const c=document.getElementById('pagecontent');
+
+ if(name==='Check Balance'){
+  c.innerHTML='<div class="card"><p>Demo Wallet Balance</p><h2>₹ '+wallet.toFixed(2)+'</h2></div>';
+ }
+ else if(name==='Add Money'){
+  c.innerHTML='<p>Demo में रकम जोड़ें</p><input id="amount" type="number" placeholder="रकम लिखें"><button class="primary" onclick="addMoney()">Add Demo Money</button>';
+ }
+ else if(name==='Send Money'||name==='Pay via Mobile Number'||name==='To Bank Account'||name==='Pay'){
+  c.innerHTML='<input id="receiver" placeholder="Demo नाम या मोबाइल नंबर"><input id="amount" type="number" placeholder="रकम लिखें"><button class="primary" onclick="sendMoney()">Demo Payment</button><p>यह वास्तविक भुगतान नहीं है।</p>';
+ }
+ else if(name==='Scan & Pay'){
+  c.innerHTML='<div style="text-align:center;font-size:65px">▦</div><p>Demo QR Scanner</p><p>अभी कैमरा या असली QR भुगतान उपलब्ध नहीं है।</p><button class="primary" onclick="alert(\'Demo QR Scanner\')">Test Scanner</button>';
+ }
+ else if(name==='My Debit Card'){
+  c.innerHTML='<div class="card"><h2>TND Pay</h2><p>DEMO CARD</p><h3>•••• •••• •••• 1234</h3><p>TEST USER</p><b>NOT A REAL BANK CARD</b></div>';
+ }
+ else if(name==='History'){
+  c.innerHTML='<h3>Demo Transaction History</h3>'+
+  (transactions.length?transactions.map(t=>'<p>'+t+'</p>').join(''):'<p>अभी कोई Demo Transaction नहीं है।</p>');
+ }
+ else if(name==='Mobile Recharge'||name==='Electricity Bill'||name==='Broadband'||name==='Gas Bill'){
+  c.innerHTML='<p>'+name+' - Demo Form</p><input placeholder="मोबाइल नंबर / Consumer ID"><input type="number" id="amount" placeholder="रकम"><button class="primary" onclick="demoService(\''+name+'\')">Continue Demo</button>';
+ }
+ else if(name==='Gift Card'){
+  c.innerHTML='<p>Demo Gift Card</p><button class="primary" onclick="alert(\'Demo Gift Card चुना गया\')">View Gift Cards</button>';
+ }
+ else if(name==='Settings'){
+  c.innerHTML='<p>Account Settings</p><button class="primary" onclick="alert(\'Demo Settings\')">Profile Settings</button>';
+ }
+ else if(name==='Notifications'){
+  c.innerHTML='<p>अभी कोई नई Demo Notification नहीं है।</p>';
+ }
+ else if(name==='More'){
+  c.innerHTML='<button class="primary" onclick="openPage(\'Settings\')">Settings</button><br><br><button class="primary" onclick="openPage(\'Notifications\')">Notifications</button>';
+ }
+ else{
+  c.innerHTML='<p>'+name+' का Demo पेज खुल गया।</p>';
+ }
+}
+function addMoney(){
+ let a=Number(document.getElementById('amount').value);
+ if(a<=0||!Number.isFinite(a))return alert('सही Demo रकम लिखें');
+ wallet+=a;
+ transactions.unshift('＋ ₹'+a.toFixed(2)+' Demo Money Added');
+ updateBalance();
+ alert('Demo Balance अपडेट हो गया');
+ goHome();
+}
+function sendMoney(){
+ let a=Number(document.getElementById('amount').value);
+ let r=document.getElementById('receiver').value.trim();
+ if(!r||a<=0||!Number.isFinite(a))return alert('नाम और सही रकम लिखें');
+ if(a>wallet)return alert('Demo Balance कम है');
+ wallet-=a;
+ transactions.unshift('− ₹'+a.toFixed(2)+' Demo Payment to '+r);
+ updateBalance();
+ alert('Demo Payment पूरा हुआ। असली पैसा नहीं भेजा गया।');
+ goHome();
+}
+function demoService(name){
+ let a=Number(document.getElementById('amount').value);
+ if(a<=0||!Number.isFinite(a))return alert('Demo रकम लिखें');
+ alert(name+' का Demo Request तैयार हुआ। कोई असली भुगतान नहीं हुआ।');
+}
+</script>
+</body>
+</html>
